@@ -13,7 +13,7 @@ controls todo 原生控制栏
 mark todo 点击标注（返回播放时间）
 
 4. 问题
-todo 初始时出现了播放和加载中同时出现的问题（初次加载视频等待时间长时）
+todo 播放加载逻辑需整理， isPlaying为true,isLoading才能为true
 todo 声音条样式
 todo 时间线鼠标划过的,虚线,时间提示
 todo 截图
@@ -53,7 +53,7 @@ todo 截图
                class="icon rewind-white-32"></i>
             <i style="transform: scale(0.8)" @click="forwardTime(forwardTimeSeconds)" class="icon forward-white-32"></i>
           </span>
-          <span style="position: relative;bottom: 0px;font-size: 12px;">
+          <span style="position: relative;bottom: 2px;font-size: 12px;">
               <span>{{currentFormatTime}}</span>/<span>{{durationFormatTime}}</span>
           </span>
         </div>
@@ -68,10 +68,10 @@ todo 截图
           <span>
             <input type="range" min="0" max="100" v-model="volumeValue" @change="setVolume"/>
           </span>
-          <span style="position: relative;bottom: 0px;font-size: 12px;">
+          <span style="position: relative;bottom: 2px;font-size: 12px;">
             <a @click="currentTimeFlag">标注</a>
           </span>
-          <span class="speed-b" style="position: relative;bottom: 0px;font-size: 12px;">
+          <span class="speed-b" style="position: relative;bottom: 2px;font-size: 12px;">
                           <a @click="showSpeed = !showSpeed">速度</a>
                           <div
                             class="speed-b-set"
@@ -98,7 +98,7 @@ todo 截图
       <!--loading and play-->
       <div class="play-inter" :class="{paused: !isPlaying}" @click="mousePlay">
         <i v-if="!isPlaying" @click="vPlay" class="icon play2-blue-64"></i>
-        <div v-if="isLoading" class="loader loader-1">
+        <div v-if="isPlaying && isLoading" class="loader loader-1">
           <div class="loader-outter"></div>
           <div class="loader-inner"></div>
         </div>
@@ -152,11 +152,21 @@ todo 截图
         default: '',
         type: String,
       },
+        changeSrc: {
+        default: false,
+          type: Boolean
+      }
     },
     watch: {
       currentTime (d) {
         this.currentFormatTime = this.formatTime(d)
       },
+      changeSrc (d) {
+        if (d === true) {
+            this.vLoad()
+            this.vPlay()
+        }
+      }
     },
     methods: {
       videoInit () {
@@ -179,6 +189,7 @@ todo 截图
         clearInterval(this.timer)
       },
       handleWaiting () {
+        this.isPlaying = true
         this.isLoading = true
       },
       handleEnded () {
@@ -191,7 +202,11 @@ todo 截图
       vPause () { // 暂停
         this.videoDom.pause()
         this.isPlaying = false
+          this.isLoading = false
       },
+        vLoad () {
+            this.videoDom.load()
+        },
       vExitFullScreen3 () { // 退出全屏
         this.isFullScreen = false
       },
@@ -293,7 +308,7 @@ todo 截图
     position: relative;
     box-shadow: 1px 1px 5px #888888;
     video {
-      /*width: 100%;*/
+      width: 100%;
       height: 100%;
     }
   }
@@ -441,6 +456,8 @@ todo 截图
     -webkit-appearance: none;
     width: 160px;
     border-radius: 10px; /*这个属性设置使填充进度条时的图形为圆角*/
+    position: relative;
+    top: -3px;
   }
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
