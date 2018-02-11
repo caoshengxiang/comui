@@ -13,7 +13,7 @@
 </template>
 
 <script>
-    import ComVideo from '../../../components/video/video'
+    import ComVideo from '../../../components/video_new/video'
 
     export default {
         name: 'video-play',
